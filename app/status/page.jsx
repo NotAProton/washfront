@@ -1,7 +1,9 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
 import { Grid, Container, TextInput, Text, Button, Loader } from '@mantine/core';
-import { emptyDaySlotArray } from './helpers';
+import { compileWeekList, emptyDaySlotArray, getCurrentSlotInfo } from '../helpers';
+import { apiDomain } from '../config';
+import Swal from 'sweetalert2';
 
 function useInterval(callback, delay) {
     const savedCallback = useRef();
@@ -16,6 +18,7 @@ function useInterval(callback, delay) {
         function tick() {
             savedCallback.current();
         }
+        tick()
         if (delay !== null) {
             let id = setInterval(tick, delay);
             return () => clearInterval(id);
@@ -26,36 +29,36 @@ function useInterval(callback, delay) {
 export default function Page() {
     const [weeklist, setWeeklist] = useState([])
 
+
     const params = new URLSearchParams();
     useInterval(() => {
-        fetch('https://notaproton.github.io/status', {
+        fetch(`${apiDomain}/status`, {
             method: 'POST',
         })
             .then((response) => {
                 if (response.status === 200) {
                     response.json().then((data) => {
-                        setData(data)
+                        setWeeklist(compileWeekList(data, emptyDaySlotArray()))
+                        console.log(weeklist)
                     })
                 } else {
                     console.log(response)
 
                 }
             })
-            .catch((error) => console.error('Error:', error))
-            .finally(() => {
-                setWeeklist(emptyDaySlotArray())
-            });
-    }, 5000);
+            .catch((error) => { Swal.fire('Error', error, 'error') })
+
+    }, 30000);
 
     return (
         <div className='flex flex-col items-center h-screen'>
 
-            {weeklist.length === 0 ? <Loader size={'xs'} /> : <div><StatusWidget /> <Week data={weeklist} /> </div>}
+            {weeklist.length === 0 ? <Loader size={'xs'} /> : <div><Navbar /><StatusWidget data={weeklist} /> <Week data={weeklist} /> </div>}
         </div>
     )
 }
 
-function Week({ data, setWeeklist }) {
+function Week({ data }) {
     return (
         <div className="flex flex-col md:flex-row">
             <div>
@@ -111,16 +114,49 @@ function ButtonMod({ item }) {
     )
 }
 
-function StatusWidget({ currentItem, nextItem }) {
-    return (
-        <div className='flex'>
-            <Container className='w-2/3 inline mr-0 rounded-l-lg' style={{ border: '3px solid rgb(186,186,186)', borderRight: '1.5px solid rgb(186,186,186)' }}>
-                <h3 className='text-xl sm:text-2xl'> Now: </h3>
+function StatusWidget({ data }) {
+    let [currentSlot, nextSlot] = getCurrentSlotInfo(data[0].slots)
 
+    if (nextSlot === null) {
+        nextSlot = data[1].slots[0]
+    }
+    console.log(nextSlot)
+    return (
+        <div className='flex mb-2 mt-1'>
+            <Container className='w-2/3 inline mr-0 rounded-l-lg' style={{ border: '3px solid rgb(186,186,186)', borderRight: '1.5px solid rgb(186,186,186)' }}>
+                <h3 className='text-xl sm:text-2xl'> Now: {currentSlot.status === 'booked' ? currentSlot.bookedBy : 'Unreserved'} </h3>
+                <Text>{currentSlot ? currentSlot.label : 'Unreserved'}</Text>
             </Container>
             <Container className='ml-0 w-1/3 inline px-px rounded-r-lg' style={{ border: '3px solid rgb(186,186,186)', borderLeft: '1.5px solid rgb(186,186,186)' }}>
-                <h3 className=' text-xl sm:text-2xl' > Up next: </h3>
+                <h3 className=' text-xl sm:text-xl' > Up next: {(nextSlot.status === 'booked') ? <span className='text-red-700 font-medium'>Reserved</span> : 'Unreserved'} </h3>
+                <Text>{nextSlot.label}</Text>
             </Container>
         </div >
     )
+}
+
+
+function Navbar() {
+    return (
+        <nav className="flex mx-auto max-w-screen-xl px-6 py-3 rounded-b-lg p-0" style={{ border: '3px solid rgb(186,186,186)', borderTop: '0px' }}>
+            <div className="justify-between text-blue-gray-900 text-xl" >
+                MJA Wash
+            </div>
+            <div className="ml-auto align-top">
+                <Button size='sm' onClick={handleBookNowCLick} className={'bg-violet-800 hover:bg-violet-900 block rounded-md'}
+                    style={{
+                        width: '100%',
+                        border: '2px solid rgb(190,190,190)',
+                        color: 'rgb(249,249,249)',
+                    }}>Book a Slot</Button>
+            </div>
+
+
+        </nav>
+    );
+}
+
+function handleBookNowCLick() {
+    //Redirect to /book
+    window.location.href = '/book';
 }

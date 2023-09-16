@@ -50,11 +50,11 @@ export default function Page() {
     return (
         <div className='flex flex-col items-center h-screen'>
             <Container className="text-neutral-700 items-center text-center rounded-lg bg-neutral-200"
-                style={{ marginTop: '10rem', marginLeft: '2rem', marginRight: '2rem', padding: '1.5rem' }}>
-                <h3 className="text-1xl text-center sm:text-2xl">
+                style={{ marginTop: '10rem', padding: '1.5rem' }}>
+                <h3 className="text-lg text-center sm:text-2xl">
                     Enter the OTP sent to your Email</h3>
-                <div className="text-sm sm:text-lg sm:mt-3 sm:text-left">
-                    <TextInput label="OTP" placeholder="0000"
+                <div className="text-sm sm:text-lg sm:mt-3 sm:text-left mt-5 sm:mt-7">
+                    <TextInput placeholder="0000"
                         value={otp}
                         onChange={handleOTPChange}
                     />

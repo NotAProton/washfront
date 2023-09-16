@@ -104,6 +104,8 @@ export default function Page() {
                 </div>
 
             </Container>
+            <div className='fixed mt-2 inset-x-0 bottom-3 text-center text-gray-800'>Built and Maintained by Akshat</div>
+
         </div>
     )
 }

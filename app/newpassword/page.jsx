@@ -7,14 +7,17 @@ import { apiDomain } from '../config';
 
 
 
-export default function Page({ searchParams }) {
+export default function Page() {
     const [openErrorModal, setOpenErrorModal] = useState(false);
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
-    const email = searchParams['mailID'];
-    const oldPassword = searchParams['otp'];
+    let urlParams, email, oldPassword;
+    if (typeof window !== "undefined") {
+        urlParams = new URLSearchParams(window.location.search);
+        email = urlParams.get('mailID');
+        oldPassword = urlParams.get('otp');
+    }
 
-    console.log(searchParams)
 
     const handlePasswordChange = (event) => {
         setPassword(event.target.value);
@@ -84,6 +87,8 @@ export default function Page({ searchParams }) {
                 </div>
 
             </Container>
+            <div className='fixed mt-2 inset-x-0 bottom-3 text-center text-gray-800'>Built and Maintained by Akshat</div>
+
         </div>
     )
 }

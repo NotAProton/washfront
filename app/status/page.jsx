@@ -53,7 +53,8 @@ export default function Page() {
     return (
         <div className='flex flex-col items-center h-screen'>
 
-            {weeklist.length === 0 ? <Loader size={'xs'} /> : <div><Navbar /><StatusWidget data={weeklist} /> <Week data={weeklist} /> </div>}
+            {weeklist.length === 0 ? <Loader size={'xs'} /> : <div><Navbar /><StatusWidget data={weeklist} /> <Week data={weeklist} /> <div className='mt-2 inset-x-0 bottom-0 text-center'>Built and Maintained by Akshat</div>
+            </div>}
         </div>
     )
 }

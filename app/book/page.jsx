@@ -41,28 +41,13 @@ export default function Page() {
 
     const params = new URLSearchParams();
     useInterval(() => {
-        fetch(`${apiDomain}/status`, {
-            method: 'POST',
-        })
-            .then((response) => {
-                if (response.status === 200) {
-                    response.json().then((data) => {
-                        setWeeklist(compileWeekList(data, emptyDaySlotArray()))
-                        console.log(weeklist)
-                    })
-                } else {
-                    console.log(response)
-
-                }
-            })
-            .catch((error) => { Swal.fire('Error', error, 'error') })
-
+        refresh(setWeeklist)
     }, 30000);
 
     return (
         <div className='flex flex-col items-center h-screen'>
 
-            {weeklist.length === 0 ? <Loader size={'xs'} /> : <div><Navbar /><BookingModal opened={opened} setOpenModal={setOpenModal} /><Week data={weeklist} openModal={setOpenModal} /> </div>}
+            {weeklist.length === 0 ? <Loader size={'xs'} /> : <div><Navbar /><BookingModal opened={opened} setOpenModal={setOpenModal} setData={setWeeklist} /><Week data={weeklist} openModal={setOpenModal} /> </div>}
         </div>
     )
 }
@@ -80,9 +65,6 @@ function Week({ data, openModal }) {
                     <Day openModal={openModal} day={item.day} data={item.slots} key={index} />
                 ))}
             </div>
-
-
-
         </div>
     )
 }
@@ -140,10 +122,10 @@ function Navbar() {
 
 
 
-function BookingModal({ opened, setOpenModal }) {
+function BookingModal({ opened, setOpenModal, setData }) {
     const [loading, setLoading] = useState(false);
     return (
-        <Modal yOffset={100} closeOnClickOutside={false} opened={opened} onClose={() => { setOpenModal(false) }} title="Book slot">
+        <Modal yOffset={100} closeOnClickOutside={false} opened={opened} onClose={() => { () => { setOpenModal(false); refresh(setData) } }} title="Book slot">
             <h3 className="text-xl"> {getDayFromSlotNo(chosenSlotID)}({getDateFromSlotID(chosenSlotID)}): {getSlotLabel(chosenSlotID)} </h3>
             <div className='mt-2 text-center'>
                 {!loading ?
@@ -216,3 +198,20 @@ function confirmBooking(e) {
     })
 
 }
+
+function refresh(setWeeklist) {
+    fetch(`${apiDomain}/status`, {
+        method: 'POST',
+    })
+        .then((response) => {
+            if (response.status === 200) {
+                response.json().then((data) => {
+                    setWeeklist(compileWeekList(data, emptyDaySlotArray()))
+                })
+            } else {
+                console.log(response)
+
+            }
+        })
+        .catch((error) => { Swal.fire('Error', error, 'error') })
+} 

@@ -1,8 +1,8 @@
 'use client';
 import Image from 'next/image'
-
+import { redirect } from 'next/navigation';
 export default function Home() {
-  window.location.href = "/status"
+  redirect("/status")
   return (
     <div>Redirecting...</div>
   )

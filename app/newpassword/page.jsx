@@ -46,7 +46,9 @@ export default function Page() {
                     console.log('Unauthorized');
                     setOpenErrorModal(true)
                 } else {
-                    redirect('/status');
+                    if (typeof window !== "undefined") {
+                        window.location.href = '/status';
+                    }
                 }
             })
             .catch((error) => {

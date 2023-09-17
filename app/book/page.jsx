@@ -5,6 +5,9 @@ import { useDisclosure } from '@mantine/hooks';
 import { getDateFromSlotID, compileWeekList, emptyDaySlotArray, getCurrentSlotInfo, getDayFromSlotNo, getSlotLabel } from '../helpers';
 import { apiDomain } from '../config';
 import Swal from 'sweetalert2';
+import { store } from './store'
+import { Provider, useDispatch, useSelector } from 'react-redux';
+import { closeBookingModal, openBookingModal, setWeeklist, setChosenSlotID } from './slice';
 
 function useInterval(callback, delay) {
     const savedCallback = useRef();
@@ -26,12 +29,12 @@ function useInterval(callback, delay) {
     }, [delay]);
 }
 
-let chosenSlotID = null
 
 export default function Page() {
+    const weeklist = useSelector(state => state.main.weeklist)
+    const dispatch = useDispatch()
 
-    const [weeklist, setWeeklist] = useState([])
-    const [opened, setOpenModal] = useState(false);
+
     if (typeof window !== "undefined") {
         if (!window.localStorage.getItem('key')) {
             window.location.href = "/login"
@@ -41,34 +44,42 @@ export default function Page() {
 
     const params = new URLSearchParams();
     useInterval(() => {
-        refresh(setWeeklist)
+        fetchWeeklist().then((data) => {
+            dispatch(setWeeklist(data))
+        })
     }, 30000);
 
+
+
     return (
+
         <div className='flex flex-col items-center h-screen'>
 
-            {weeklist.length === 0 ? <Loader size={'xs'} /> : <div><Navbar /><BookingModal opened={opened} setOpenModal={setOpenModal} setData={setWeeklist} /><Week data={weeklist} openModal={setOpenModal} /> </div>}
+            {weeklist.length === 0 ? <Loader size={'xs'} /> : <div><Navbar /><BookingModal /><Week /> </div>}
         </div>
+
     )
 }
 
-function Week({ data, openModal }) {
+function Week() {
+    const data = useSelector(state => state.main.weeklist)
+
     return (
         <div className="flex flex-col md:flex-row">
             <div>
                 {data.slice(0, 3).map((item, index) => (
-                    <Day openModal={openModal} day={item.day} data={item.slots} key={index} />
+                    <Day day={item.day} data={item.slots} key={index} />
                 ))}
             </div>
             <div>
                 {data.slice(3, 6).map((item, index) => (
-                    <Day openModal={openModal} day={item.day} data={item.slots} key={index} />
+                    <Day day={item.day} data={item.slots} key={index} />
                 ))}
             </div>
         </div>
     )
 }
-function Day({ day, data, openModal }) {
+function Day({ day, data }) {
     const odd = data.filter((_, i) => i % 2 === 0);
     const even = data.filter((_, i) => i % 2 !== 0);
 
@@ -79,12 +90,12 @@ function Day({ day, data, openModal }) {
                 <Grid columns={8}>
                     <Grid.Col span={4} >
                         {odd.map((item, index) => (
-                            <ButtonMod item={item} key={index} openModal={openModal} />
+                            <ButtonMod item={item} key={index} />
                         ))}
                     </Grid.Col>
                     <Grid.Col span={4}>
                         {even.map((item, index) => (
-                            <ButtonMod item={item} key={index} openModal={openModal} />
+                            <ButtonMod item={item} key={index} />
                         ))}
                     </Grid.Col>
                 </Grid>
@@ -93,9 +104,11 @@ function Day({ day, data, openModal }) {
     )
 }
 
-function ButtonMod({ item, openModal }) {
+function ButtonMod({ item }) {
+    const dispatch = useDispatch()
+
     return (
-        <Button disabled={item.status === 'booked' ? true : false} onClick={() => { openModal(true); handleSlotClick(item) }} size={'lg'} className={' mt-2 rounded-md block'}
+        <Button disabled={item.status === 'booked' ? true : false} onClick={() => { dispatch(openBookingModal()); dispatch(setChosenSlotID(item.slotno)) }} size={'lg'} className={' mt-2 rounded-md block'}
             style={{
                 backgroundColor: item.status === 'booked' ? 'rgb(128,128,128)' : 'rgba(12, 156, 94, 0.5)',
                 width: '100%',
@@ -111,7 +124,8 @@ function Navbar() {
     return (
         <nav className="flex px-6 py-3 rounded-b-lg p-0" style={{ border: '3px solid rgb(186,186,186)', borderTop: '0px' }}>
             <div className="justify-between text-blue-gray-900 text-xl" >
-                MJA Wash
+                MJA Wash<br />
+                <text className='text-lg'>Pick a slot</text>
             </div>
 
 
@@ -122,10 +136,14 @@ function Navbar() {
 
 
 
-function BookingModal({ opened, setOpenModal, setData }) {
+function BookingModal() {
     const [loading, setLoading] = useState(false);
+    const opened = useSelector(state => state.main.bookingModalOpened)
+    const chosenSlotID = useSelector(state => state.main.chosenSlotID)
+    const dispatch = useDispatch()
+
     return (
-        <Modal yOffset={100} closeOnClickOutside={false} opened={opened} onClose={() => { () => { setOpenModal(false); refresh(setData) } }} title="Book slot">
+        <Modal yOffset={100} closeOnClickOutside={false} opened={opened} onClose={() => { console.log('help'); dispatch(closeBookingModal()) }} title="Book slot">
             <h3 className="text-xl"> {getDayFromSlotNo(chosenSlotID)}({getDateFromSlotID(chosenSlotID)}): {getSlotLabel(chosenSlotID)} </h3>
             <div className='mt-2 text-center'>
                 {!loading ?
@@ -133,7 +151,10 @@ function BookingModal({ opened, setOpenModal, setData }) {
                         setLoading(true)
                         confirmBooking(chosenSlotID).then(() => {
                             setLoading(false)
-                            setOpenModal(false)
+                            dispatch(closeBookingModal())
+                            fetchWeeklist().then((data) => {
+                                dispatch(setWeeklist(data))
+                            })
                         })
                     }} className='mt-3 bg-gradient-to-r from-lime-500 to-green-600 hover:from-lime-600 hover:to-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline'
                         style={{ border: '2px solid grey' }}>Confirm Booking</Button>
@@ -145,9 +166,6 @@ function BookingModal({ opened, setOpenModal, setData }) {
     )
 }
 
-function handleSlotClick(e) {
-    chosenSlotID = e.slotno
-}
 
 //return promise true when done
 function confirmBooking(e) {
@@ -199,19 +217,22 @@ function confirmBooking(e) {
 
 }
 
-function refresh(setWeeklist) {
-    fetch(`${apiDomain}/status`, {
-        method: 'POST',
-    })
-        .then((response) => {
-            if (response.status === 200) {
-                response.json().then((data) => {
-                    setWeeklist(compileWeekList(data, emptyDaySlotArray()))
-                })
-            } else {
-                console.log(response)
-
-            }
+function fetchWeeklist() {
+    return new Promise((resolve) => {
+        fetch(`${apiDomain}/status`, {
+            method: 'POST',
         })
-        .catch((error) => { Swal.fire('Error', error, 'error') })
+            .then((response) => {
+                if (response.status === 200) {
+                    response.json().then((data) => {
+                        resolve(compileWeekList(data, emptyDaySlotArray()))
+                    })
+                } else {
+                    console.log(response)
+
+                }
+            })
+            .catch((error) => { Swal.fire('Error', error, 'error'); resolve(null) })
+    })
+
 } 

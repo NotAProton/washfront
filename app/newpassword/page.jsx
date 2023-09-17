@@ -69,7 +69,7 @@ export default function Page() {
                 style={{ marginTop: '10rem', padding: '1.5rem' }}>
                 <h3 className="text-1xl text-center sm:text-2xl">
                     Enter a new password</h3>
-                <div className="text-sm sm:text-lg sm:mt-3 sm:text-left mt-5 sm:mt-7">
+                <div className="text-sm sm:text-lg sm:text-left mt-5 sm:mt-7">
 
                     <PasswordInput
                         value={password}

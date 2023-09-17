@@ -227,10 +227,14 @@ function fetchWeeklist() {
                     response.json().then((data) => {
                         resolve(compileWeekList(data, emptyDaySlotArray()))
                     })
+
+                } else if (response.status === 204) {
+                    resolve(compileWeekList([], emptyDaySlotArray()))
                 } else {
                     console.log(response)
 
                 }
+
             })
             .catch((error) => { Swal.fire('Error', error, 'error'); resolve(null) })
     })

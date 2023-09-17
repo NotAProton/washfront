@@ -112,7 +112,6 @@ function ButtonMod ({ item }) {
 
 function StatusWidget ({ data }) {
   let [currentSlot, nextSlot] = getCurrentSlotInfo(data[0].slots)
-  console.log(nextSlot)
 
   if (nextSlot === null) {
     nextSlot = data[1].slots[0]

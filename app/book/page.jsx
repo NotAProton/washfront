@@ -129,7 +129,7 @@ function BookingModal () {
   const dispatch = useDispatch()
 
   return (
-        <Modal yOffset={100} closeOnClickOutside={false} opened={opened} onClose={() => { console.log('help'); dispatch(closeBookingModal()) }} title="Book slot">
+        <Modal yOffset={100} closeOnClickOutside={false} opened={opened} onClose={() => { dispatch(closeBookingModal()) }} title="Book slot">
             <h3 className="text-xl"> {getDayFromSlotNo(chosenSlotID)}({getDateFromSlotID(chosenSlotID)}): {getSlotLabel(chosenSlotID)} </h3>
             <div className='mt-2 text-center'>
                 {!loading
@@ -214,7 +214,7 @@ function fetchWeeklist () {
         } else if (response.status === 204) {
           resolve(compileWeekList([], emptyDaySlotArray()))
         } else {
-          console.log(response)
+          console.error(response)
         }
       })
       .catch((error) => { Swal.fire('Error', error, 'error'); resolve(null) })

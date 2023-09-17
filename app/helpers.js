@@ -163,6 +163,7 @@ export function compileWeekList(serverData, emptyDaySlotArray) {
                 obj.slots.forEach(slot => {
                     if (slot.slotno === item.slotno) {
                         slot.status = 'booked';
+                        slot.bookedBy = item.mailID
                     }
                 });
             }
@@ -214,5 +215,21 @@ export function getDateFromSlotID(slotID) {
     let day = getDayFromSlotNo(slotID)
 
     return getNearestDate(day)
+}
+
+export function formatName(str) {
+    const nameRegex = new RegExp(/^[a-zA-Z]*/)
+    let name = str.match(nameRegex)[0]
+    name = name.charAt(0).toUpperCase() + name.slice(1);
+    str = str.replace(nameRegex, '');
+
+    const yearRegex = /[0-9]+/;
+    str = str.replace(yearRegex, '');
+
+    let branch = str.match(nameRegex)[0]
+    branch = branch.toUpperCase()
+    str = str.replace(nameRegex, '');
+
+    return name + ' (' + branch + '-' + str + ')'
 }
 

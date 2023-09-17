@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
 import { Grid, Container, TextInput, Text, Button, Loader } from '@mantine/core';
-import { compileWeekList, emptyDaySlotArray, getCurrentSlotInfo } from '../helpers';
+import { compileWeekList, emptyDaySlotArray, formatName, getCurrentSlotInfo } from '../helpers';
 import { apiDomain } from '../config';
 import Swal from 'sweetalert2';
 
@@ -25,6 +25,8 @@ function useInterval(callback, delay) {
         }
     }, [delay]);
 }
+
+const nameRegex = new RegExp(/^[a-zA-Z]*/)
 
 export default function Page() {
     const [weeklist, setWeeklist] = useState([])
@@ -120,15 +122,15 @@ function StatusWidget({ data }) {
     if (nextSlot === null) {
         nextSlot = data[1].slots[0]
     }
-    console.log(nextSlot)
+    console.log(currentSlot.bookedBy)
     return (
         <div className='flex mb-2 mt-1'>
             <Container className='w-2/3 inline mr-0 rounded-l-lg' style={{ border: '3px solid rgb(186,186,186)', borderRight: '1.5px solid rgb(186,186,186)' }}>
-                <h3 className='text-xl sm:text-2xl'> Now: {currentSlot.status === 'booked' ? currentSlot.bookedBy : 'Unreserved'} </h3>
+                <h3 className='text-xl sm:text-2xl'> Now: {currentSlot.status === 'booked' ? <><span className='text-red-700 font-medium'>Reserved <br /></span> <span className='text-lg'>{formatName(currentSlot.bookedBy)} </span></> : 'Unreserved'} </h3>
                 <Text>{currentSlot ? currentSlot.label : 'Unreserved'}</Text>
             </Container>
             <Container className='ml-0 w-1/3 inline px-px rounded-r-lg' style={{ border: '3px solid rgb(186,186,186)', borderLeft: '1.5px solid rgb(186,186,186)' }}>
-                <h3 className=' text-xl sm:text-xl' > Up next: {(nextSlot.status === 'booked') ? <span className='text-red-700 font-medium'>Reserved</span> : 'Unreserved'} </h3>
+                <h3 className=' text-xl sm:text-xl' > Up next: {(nextSlot.status === 'booked') ? <><span className='text-red-700 font-medium'>Reserved</span> <span className='text-lg'> {formatName(nextSlot.bookedBy)} </span> </> : 'Unreserved'} </h3>
                 <Text>{nextSlot.label}</Text>
             </Container>
         </div >
@@ -159,4 +161,9 @@ function Navbar() {
 function handleBookNowCLick() {
     //Redirect to /book
     window.location.href = '/book';
+}
+
+function capitalizeFirstLetter(string) {
+    if (!string || typeof string !== 'string') return
+    return
 }

@@ -1,14 +1,12 @@
-'use client';
-import { AppProps } from 'next/app';
+'use client'
 import './globals.css'
 
-import Head from 'next/head';
-import { MantineProvider } from '@mantine/core';
-import { Provider } from 'react-redux';
-import store from './book/store';
+import Head from 'next/head'
+import { MantineProvider } from '@mantine/core'
+import { Provider } from 'react-redux'
+import store from './store'
 
-export default function App({ children }) {
-
+export default function App ({ children }) {
   return (
     <>
       <html>
@@ -21,7 +19,7 @@ export default function App({ children }) {
           withGlobalStyles
           withNormalizeCSS
           theme={{
-            colorScheme: 'light',
+            colorScheme: 'light'
           }}
         >
           <body>
@@ -33,5 +31,5 @@ export default function App({ children }) {
         </MantineProvider>
       </html>
     </>
-  );
+  )
 }

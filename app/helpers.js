@@ -78,8 +78,10 @@ export function getCurrentSlotInfo (slots) {
 
   // Special case for time between 1AM and 6AM
   if (currentHour >= 1 && currentHour < 6) {
-    return ['noSlots', null]
+    return [null, null]
   }
+
+  let lastFinishedSlotIndex = 0
 
   for (let i = 0; i < slots.length; i++) {
     // Extract start and end times from slot label
@@ -94,6 +96,9 @@ export function getCurrentSlotInfo (slots) {
       }
       return [slots[i], slots[i + 1]]
     }
+    if (endHour !== 1 && (currentHour >= endHour)) {
+      lastFinishedSlotIndex = i
+    }
   }
 
   // Special case for slot between 11PM and 1AM
@@ -106,8 +111,11 @@ export function getCurrentSlotInfo (slots) {
     return [null, null]
   }
 
-  // If no slot found, return "no more slots today"
-  return [null, null]
+  if (lastFinishedSlotIndex === slots.length - 1) {
+    return [null, null]
+  }
+
+  return [null, slots[lastFinishedSlotIndex + 1]]
 }
 
 export function emptyDaySlotArray () {
@@ -219,4 +227,14 @@ export function formatName (str) {
   str = str.replace(nameRegex, '')
 
   return name + ' (' + branch + '-' + str + ')'
+}
+
+export function getSlotInfo (slotno, data) {
+  for (let i = 0; i < data.length; i++) {
+    console.log(data[i].slots)
+    if (data[i].slots.find(item => item.slotno === slotno)) {
+      return data[i].slots.find(item => item.slotno === slotno)
+    }
+  }
+  return null
 }

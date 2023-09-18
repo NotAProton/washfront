@@ -1,9 +1,11 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
-import { Grid, Container, Text, Button, Loader } from '@mantine/core'
-import { compileWeekList, emptyDaySlotArray, formatName, getCurrentSlotInfo } from '../helpers'
+import { Grid, Container, Text, Button, Loader, Modal } from '@mantine/core'
+import { compileWeekList, emptyDaySlotArray, formatName, getCurrentSlotInfo, getDateFromSlotID, getSlotInfo } from '../helpers'
 import { apiDomain } from '../config'
 import Swal from 'sweetalert2'
+import { useSelector, useDispatch } from 'react-redux'
+import { closeModal, openModal, setWeeklist, setChosenSlotID } from './slice'
 
 function useInterval (callback, delay) {
   const savedCallback = useRef()
@@ -27,7 +29,8 @@ function useInterval (callback, delay) {
 }
 
 export default function Page () {
-  const [weeklist, setWeeklist] = useState([])
+  const weeklist = useSelector(state => state.status.weeklist)
+  const dispatch = useDispatch()
 
   useInterval(() => {
     fetch(`${apiDomain}/status`, {
@@ -36,10 +39,10 @@ export default function Page () {
       .then((response) => {
         if (response.status === 200) {
           response.json().then((data) => {
-            setWeeklist(compileWeekList(data, emptyDaySlotArray()))
+            dispatch(setWeeklist(compileWeekList(data, emptyDaySlotArray())))
           })
         } else if (response.status === 204) {
-          setWeeklist(compileWeekList([], emptyDaySlotArray()))
+          dispatch(setWeeklist(compileWeekList([], emptyDaySlotArray())))
         }
       })
       .catch((error) => { Swal.fire('Error', error, 'error') })
@@ -50,7 +53,7 @@ export default function Page () {
 
             {weeklist.length === 0
               ? <Loader size={'lg'} className='mt-3' />
-              : <div><Navbar /><StatusWidget data={weeklist} /> <Week data={weeklist} /> <div className='mt-2 inset-x-0 bottom-0 text-center'>Built and Maintained by Akshat</div>
+              : <div><SlotModal /><Navbar /><StatusWidget data={weeklist} /> <Week data={weeklist} /> <div className='mt-2 inset-x-0 bottom-0 text-center'>Built and Maintained by Akshat</div>
             </div>}
         </div>
   )
@@ -65,7 +68,7 @@ function Week ({ data }) {
                 ))}
             </div>
             <div>
-                {data.slice(3, 6).map((item, index) => (
+                {data.slice(3, 7).map((item, index) => (
                     <Day day={item.day} data={item.slots} key={index} />
                 ))}
             </div>
@@ -99,19 +102,23 @@ function Day ({ day, data }) {
 }
 
 function ButtonMod ({ item }) {
+  const dispatch = useDispatch()
   return (
-        <Button disabled={true} size={'lg'} className={'block mt-2 rounded-md'}
+        <Button disabled={item.status !== 'booked'} size={'lg'} className={'block mt-2 rounded-md'}
             style={{
               backgroundColor: item.status === 'booked' ? 'rgb(128,128,128)' : 'rgba(12, 156, 94, 0.5)',
               width: '100%',
               border: item.status === 'booked' ? '2px solid rgb(190,190,190)' : '2px solid rgb(9, 121, 105)',
               color: item.status === 'booked' ? 'rgb(249,249,249)' : 'rgb(0,53,0)'
-            }}>{item.label}</Button>
+            }}
+            onClick={() => { dispatch(openModal()); dispatch(setChosenSlotID(item.slotno)) }}
+            >{item.label}</Button>
   )
 }
 
 function StatusWidget ({ data }) {
   let [currentSlot, nextSlot] = getCurrentSlotInfo(data[0].slots)
+  console.log(nextSlot)
 
   if (nextSlot === null) {
     nextSlot = data[1].slots[0]
@@ -152,4 +159,18 @@ function Navbar () {
 function handleBookNowCLick () {
   // Redirect to /book
   window.location.href = '/book'
+}
+
+function SlotModal () {
+  const weeklist = useSelector(state => state.status.weeklist)
+  const slotno = useSelector(state => state.status.chosenSlotID)
+  const opened = useSelector(state => state.status.modalOpened)
+  const dispatch = useDispatch()
+  const slot = getSlotInfo(slotno, weeklist)
+  return (
+    <Modal centered={true} opened={opened} onClose={() => dispatch(closeModal())} title={<>{slot.label} ({getDateFromSlotID(slotno)})</>}>
+      {slot.status === 'booked'
+        ? <><span className='text-red-700 font-medium'>Reserved <br /></span> <span className='text-lg'>{formatName(slot.bookedBy)} </span></>
+        : 'Unreserved'}</Modal>
+  )
 }

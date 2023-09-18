@@ -47,7 +47,7 @@ export default function Page () {
 
         <div className='flex flex-col items-center h-screen'>
 
-            {weeklist.length === 0 ? <Loader size={'xs'} /> : <div><Navbar /><BookingModal /><Week /> </div>}
+            {weeklist.length === 0 ? <Loader size={'lg'} /> : <div><Navbar /><BookingModal /><Week /> </div>}
         </div>
 
   )
@@ -64,7 +64,7 @@ function Week () {
                 ))}
             </div>
             <div>
-                {data.slice(3, 6).map((item, index) => (
+                {data.slice(3, 7).map((item, index) => (
                     <Day day={item.day} data={item.slots} key={index} />
                 ))}
             </div>

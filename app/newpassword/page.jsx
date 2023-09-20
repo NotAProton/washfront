@@ -1,64 +1,60 @@
-'use client';
-import { useState } from 'react';
-import { redirect } from 'next/navigation';
-import { Container, TextInput, Text, Button, Loader, PasswordInput, Modal } from '@mantine/core';
+'use client'
+import { useState } from 'react'
+import { redirect } from 'next/navigation'
+import { Container, TextInput, Text, Button, Loader, PasswordInput, Modal } from '@mantine/core'
 import { AlertIcon } from '@primer/octicons-react'
-import { apiDomain } from '../config';
+import { apiDomain } from '../config'
 
+export default function Page () {
+  const [openErrorModal, setOpenErrorModal] = useState(false)
+  const [password, setPassword] = useState('')
+  const [loading, setLoading] = useState(false)
+  let urlParams, email, oldPassword
+  if (typeof window !== 'undefined') {
+    urlParams = new URLSearchParams(window.location.search)
+    email = urlParams.get('mailID')
+    oldPassword = urlParams.get('otp')
+  }
 
+  const handlePasswordChange = (event) => {
+    setPassword(event.target.value)
+  }
 
-export default function Page() {
-    const [openErrorModal, setOpenErrorModal] = useState(false);
-    const [password, setPassword] = useState('');
-    const [loading, setLoading] = useState(false);
-    let urlParams, email, oldPassword;
-    if (typeof window !== "undefined") {
-        urlParams = new URLSearchParams(window.location.search);
-        email = urlParams.get('mailID');
-        oldPassword = urlParams.get('otp');
-    }
+  const isPasswordValid = () => {
+    return password.length < 20 && password.length >= 3
+  }
 
+  const handleButtonClick = () => {
+    setLoading(true)
+    const params = new URLSearchParams()
+    params.append('mailID', email)
+    params.append('password', oldPassword)
+    params.append('newPassword', password)
 
-    const handlePasswordChange = (event) => {
-        setPassword(event.target.value);
-    }
+    fetch(`${apiDomain}/changepassword`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: params.toString()
+    })
+      .then((response) => {
+        if (response.status === 401) {
+          console.log('Unauthorized')
+          setOpenErrorModal(true)
+        } else {
+          if (typeof window !== 'undefined') {
+            window.location.href = '/status'
+          }
+        }
+      })
+      .catch((error) => {
+        console.error('Error:', error)
+      })
+      .finally(() => setLoading(false))
+  }
 
-    const isPasswordValid = () => {
-        return password.length < 20 && password.length >= 3
-    }
-
-    const handleButtonClick = () => {
-        setLoading(true);
-        const params = new URLSearchParams();
-        params.append('mailID', email);
-        params.append('password', oldPassword);
-        params.append('newPassword', password)
-
-        fetch(`${apiDomain}/changepassword`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: params.toString(),
-        })
-            .then((response) => {
-                if (response.status === 401) {
-                    console.log('Unauthorized');
-                    setOpenErrorModal(true)
-                } else {
-                    if (typeof window !== "undefined") {
-                        window.location.href = '/status';
-                    }
-                }
-            })
-            .catch((error) => {
-                console.error('Error:', error)
-            })
-            .finally(() => setLoading(false));
-    };
-
-
-    return (
+  return (
         <div className='flex flex-col items-center h-screen'>
             <Modal opened={openErrorModal} title={<AlertIcon size={32} fill='#9f1225' className='block content-center' />} withCloseButton={false}>
                 <h3 className='text-2xl text-rose-800 text-center mt-0 p-0 mb-2'>Error</h3>
@@ -92,5 +88,5 @@ export default function Page() {
             <div className='fixed mt-2 inset-x-0 bottom-3 text-center text-gray-800'>Built and Maintained by Akshat</div>
 
         </div>
-    )
+  )
 }

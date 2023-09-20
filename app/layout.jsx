@@ -1,19 +1,19 @@
 'use client'
 import './globals.css'
 
-import Head from 'next/head'
 import { MantineProvider } from '@mantine/core'
 import { Provider } from 'react-redux'
 import store from './store'
 
 export default function App ({ children }) {
   return (
-    <>
+
       <html>
-        <Head>
+        <head>
           <meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width" />
+          <meta property="og:title" content="MJA Wash" />
           <title>MJA Wash</title>
-        </Head>
+        </head>
 
         <MantineProvider
           withGlobalStyles
@@ -24,12 +24,11 @@ export default function App ({ children }) {
         >
           <body>
             <Provider store={store}>
-
               {children}
             </Provider>
           </body>
         </MantineProvider>
       </html>
-    </>
+
   )
 }

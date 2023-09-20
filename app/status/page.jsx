@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { Grid, Container, Text, Button, Loader, Modal } from '@mantine/core'
 import { compileWeekList, emptyDaySlotArray, formatName, getCurrentSlotInfo, getDateFromSlotID, getSlotInfo } from '../helpers'
 import { apiDomain } from '../config'
@@ -139,12 +139,12 @@ function StatusWidget ({ data }) {
 
 function Navbar () {
   return (
-        <nav className='flex mx-auto max-w-screen-xl px-6 py-3 rounded-b-lg p-0' style={{ border: '3px solid rgb(186,186,186)', borderTop: '0px' }}>
-            <div className="justify-between text-blue-gray-900 text-xl" >
+        <nav className='flex mx-auto max-w-screen-xl px-4 py-3 rounded-b-lg p-0 align-middle' style={{ border: '3px solid rgb(186,186,186)', borderTop: '0px' }}>
+            <div className="text-blue-gray-900 text-4xl my-auto" >
                 MJA Wash
             </div>
-            <div className="ml-auto align-top">
-                <Button size='sm' onClick={handleBookNowCLick} className={'bg-violet-800 hover:bg-violet-900 block rounded-md'}
+            <div className="ml-auto">
+                <Button size='xl' onClick={handleBookNowCLick} className={'bg-violet-800 hover:bg-violet-900 block rounded-md'}
                     style={{
                       width: '100%',
                       border: '2px solid rgb(190,190,190)',

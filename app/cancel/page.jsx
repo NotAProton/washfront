@@ -5,8 +5,11 @@ import { getDateFromSlotID, compileWeekList, emptyDaySlotArray, getDayFromSlotNo
 import { apiDomain } from '../config'
 import Swal from 'sweetalert2'
 import { useSelector, useDispatch } from 'react-redux'
-import { closeBookingModal, openBookingModal, setWeeklist, setChosenSlotID } from './slice'
-
+import { closeCancelModal, openCancelModal, setWeeklist, setChosenSlotID } from './slice'
+let mailID
+if (typeof window !== 'undefined') {
+  mailID = window.localStorage.getItem('emailID')
+}
 function useInterval (callback, delay) {
   const savedCallback = useRef()
   // Remember the latest callback.
@@ -28,12 +31,12 @@ function useInterval (callback, delay) {
 }
 
 export default function Page () {
-  const weeklist = useSelector(state => state.main.weeklist)
+  const weeklist = useSelector(state => state.cancel.weeklist)
   const dispatch = useDispatch()
 
   if (typeof window !== 'undefined') {
     if (!window.localStorage.getItem('key')) {
-      window.location.href = '/login?next=book'
+      window.location.href = '/login?next=cancel'
     }
   }
 
@@ -47,14 +50,14 @@ export default function Page () {
 
         <div className='flex flex-col items-center h-screen'>
 
-            {weeklist.length === 0 ? <Loader size={'lg'} /> : <div><Navbar /><BookingModal /><Week /> </div>}
+            {weeklist.length === 0 ? <Loader size={'lg'} /> : <div><Navbar /><CancelModal /><Week /> </div>}
         </div>
 
   )
 }
 
 function Week () {
-  const data = useSelector(state => state.main.weeklist)
+  const data = useSelector(state => state.cancel.weeklist)
 
   return (
         <div className="flex flex-col md:flex-row">
@@ -98,14 +101,15 @@ function Day ({ day, data }) {
 
 function ButtonMod ({ item }) {
   const dispatch = useDispatch()
+  const disabled = item.status !== 'booked' || item.bookedBy !== mailID
 
   return (
-        <Button disabled={item.status === 'booked'} onClick={() => { dispatch(openBookingModal()); dispatch(setChosenSlotID(item.slotno)) }} size={'lg'} className={' mt-2 rounded-md block'}
+        <Button disabled={disabled} onClick={() => { dispatch(openCancelModal()); dispatch(setChosenSlotID(item.slotno)) }} size={'lg'} className={' mt-2 rounded-md block'}
             style={{
-              backgroundColor: item.status === 'booked' ? 'rgb(128,128,128)' : 'rgba(12, 156, 94, 0.5)',
+              backgroundColor: disabled ? 'rgb(128,128,128)' : 'rgba(255, 0, 0, 0.5)',
               width: '100%',
-              border: item.status === 'booked' ? '2px solid rgb(190,190,190)' : '2px solid rgb(9, 121, 105)',
-              color: item.status === 'booked' ? 'rgb(249,249,249)' : 'rgb(0,53,0)'
+              border: disabled ? '2px solid rgb(190,190,190)' : '2px solid rgb(255, 0, 0)',
+              color: disabled ? 'rgb(249,249,249)' : 'rgb(100, 0, 0)'
             }}>{item.label}</Button>
   )
 }
@@ -115,35 +119,35 @@ function Navbar () {
         <nav className="flex px-6 py-3 rounded-b-lg p-0" style={{ border: '3px solid rgb(186,186,186)', borderTop: '0px' }}>
             <div className="justify-between text-blue-gray-900 text-xl" >
                 MJA Wash<br />
-                <span className='text-lg'>Pick a slot</span>
+                <span className='text-lg'>Choose which slot to cancel</span>
             </div>
 
         </nav>
   )
 }
 
-function BookingModal () {
+function CancelModal () {
   const [loading, setLoading] = useState(false)
-  const opened = useSelector(state => state.main.bookingModalOpened)
-  const chosenSlotID = useSelector(state => state.main.chosenSlotID)
+  const opened = useSelector(state => state.cancel.bookingModalOpened)
+  const chosenSlotID = useSelector(state => state.cancel.chosenSlotID)
   const dispatch = useDispatch()
 
   return (
-        <Modal yOffset={100} closeOnClickOutside={false} opened={opened} onClose={() => { dispatch(closeBookingModal()) }} title="Book slot">
+        <Modal yOffset={100} closeOnClickOutside={false} opened={opened} onClose={() => { dispatch(closeCancelModal()) }} title="Cancel slot">
             <h3 className="text-xl"> {getDayFromSlotNo(chosenSlotID)}({getDateFromSlotID(chosenSlotID)}): {getSlotLabel(chosenSlotID)} </h3>
             <div className='mt-2 text-center'>
                 {!loading
                   ? <Button onClick={() => {
                     setLoading(true)
-                    confirmBooking(chosenSlotID).then(() => {
+                    cancelSlot(chosenSlotID).then(() => {
                       setLoading(false)
-                      dispatch(closeBookingModal())
+                      dispatch(closeCancelModal())
                       fetchWeeklist().then((data) => {
                         dispatch(setWeeklist(data))
                       })
                     })
-                  }} className='mt-3 bg-gradient-to-r from-lime-500 to-green-600 hover:from-lime-600 hover:to-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline'
-                        style={{ border: '2px solid grey' }}>Confirm Booking</Button>
+                  }} className='mt-3 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline'
+                        style={{ border: '2px solid grey' }}>Confirm Cancellation</Button>
                   : <Loader size={'xs'} />
                 }
             </div>
@@ -153,13 +157,13 @@ function BookingModal () {
 }
 
 // return promise true when done
-function confirmBooking (e) {
+function cancelSlot (e) {
   return new Promise((resolve) => {
     const key = localStorage.getItem('key')
     const params = new URLSearchParams()
     params.append('slot', e)
 
-    fetch(`${apiDomain}/book`, {
+    fetch(`${apiDomain}/cancel`, {
       method: 'POST',
       headers: {
         Authorization: key,
@@ -168,33 +172,36 @@ function confirmBooking (e) {
       body: params.toString()
     })
       .then((response) => {
-        if (response.status === 401) {
-          Swal.fire(
-            'Booking Failed',
-            'Please login and try again',
-            'error'
-          )
-          localStorage.removeItem('key')
-          window.location.href = '/login'
-        } else if (response.status === 200) {
-          Swal.fire(
-            'Success',
-            'Booking Confirmed',
-            'success'
-          )
-        } else if (response.status === 403) {
-          Swal.fire(
-            'Booking Failed',
-            'You already booked 2 slots this week',
-            'error'
-          )
-        } else if (response.status === 208) {
-          Swal.fire(
-            'Booking Failed',
-            'Sorry, that slot is no longer available',
-            'error'
-          )
-        }
+        response.text().then((text) => {
+          if (response.status === 403 && text === 'Cannot cancel now') {
+            Swal.fire(
+              'Cancellation Failed',
+              'Slots must be cancelled at least 3 hours before the slot time',
+              'error'
+            )
+          } else if (response.status === 200) {
+            Swal.fire(
+              'Success',
+              'Booking Confirmed',
+              'success'
+            )
+          } else if (response.status === 403) {
+            Swal.fire(
+              'Booking Failed',
+              'Authentication failed: You are not authorised to cancel this slot',
+              'error'
+            )
+          } else if (response.status === 401) {
+            Swal.fire(
+              'Booking Failed',
+              'Authentication failed: Please login and try again',
+              'error'
+            ).then(() => {
+              window.location.href = '/login?next=cancel'
+            }
+            )
+          }
+        })
       })
       .catch((error) => console.error('Error:', error))
       .finally(() => resolve(true))

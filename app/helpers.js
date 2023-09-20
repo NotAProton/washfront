@@ -231,7 +231,6 @@ export function formatName (str) {
 
 export function getSlotInfo (slotno, data) {
   for (let i = 0; i < data.length; i++) {
-    console.log(data[i].slots)
     if (data[i].slots.find(item => item.slotno === slotno)) {
       return data[i].slots.find(item => item.slotno === slotno)
     }

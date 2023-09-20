@@ -1,1 +1,1 @@
-export const apiDomain = "https://washserver.notaproton.me"
+export const apiDomain = 'http://localhost:8080'

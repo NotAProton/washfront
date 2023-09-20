@@ -53,7 +53,7 @@ export default function Page () {
 
             {weeklist.length === 0
               ? <Loader size={'lg'} className='mt-3' />
-              : <div><SlotModal /><Navbar /><StatusWidget data={weeklist} /> <Week data={weeklist} /> <div className='mt-2 inset-x-0 bottom-0 text-center'>Built and Maintained by Akshat</div>
+              : <div><SlotModal /><Navbar /><StatusWidget data={weeklist} /> <Week data={weeklist} /> <Footer />
             </div>}
         </div>
   )
@@ -140,7 +140,7 @@ function StatusWidget ({ data }) {
 function Navbar () {
   return (
         <nav className='flex mx-auto max-w-screen-xl px-4 py-3 rounded-b-lg p-0 align-middle' style={{ border: '3px solid rgb(186,186,186)', borderTop: '0px' }}>
-            <div className="text-blue-gray-900 text-4xl my-auto" >
+            <div className="text-blue-gray-900 text-2xl sm:text-4xl my-auto" >
                 MJA Wash
             </div>
             <div className="ml-auto">
@@ -152,6 +152,23 @@ function Navbar () {
                     }}>Book a Slot</Button>
             </div>
 
+        </nav>
+  )
+}
+
+function Footer () {
+  let mailID = null
+  if (typeof window !== 'undefined') {
+    mailID = window.localStorage.getItem('emailID')
+  }
+  return (
+        <nav className='mt-2 inset-x-0 bottom-0 flex mx-auto max-w-screen-xl px-4 py-3 rounded-t-lg p-0 items-center' style={{ border: '3px solid rgb(186,186,186)', borderBottom: '0px' }}>
+          <Text>Status: {mailID ? `Logged in as ${mailID}` : 'Not logged in'}</Text>
+          <Button className='ml-auto bg-blue-800 hover:bg-blue-900' onClick={handleLogoutClick}
+          style={{
+            border: '2px solid rgb(190,190,190)',
+            color: 'rgb(249,249,249)'
+          }}>Logout</Button>
         </nav>
   )
 }
@@ -173,4 +190,8 @@ function SlotModal () {
         ? <><span className='text-red-700 font-medium'>Reserved <br /></span> <span className='text-lg'>{formatName(slot.bookedBy)} </span></>
         : 'Unreserved'}</Modal>
   )
+}
+
+function handleLogoutClick () {
+  window.location.href = '/logout'
 }

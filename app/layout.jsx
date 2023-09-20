@@ -1,5 +1,6 @@
 'use client'
 import './globals.css'
+import './fonts.css'
 
 import { MantineProvider } from '@mantine/core'
 import { Provider } from 'react-redux'

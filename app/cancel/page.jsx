@@ -1,11 +1,12 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
-import { Grid, Container, Button, Loader, Modal } from '@mantine/core'
+import { Grid, Container, Button, Loader, Modal, Text } from '@mantine/core'
 import { getDateFromSlotID, compileWeekList, emptyDaySlotArray, getDayFromSlotNo, getSlotLabel } from '../helpers'
 import { apiDomain } from '../config'
 import Swal from 'sweetalert2'
 import { useSelector, useDispatch } from 'react-redux'
 import { closeCancelModal, openCancelModal, setWeeklist, setChosenSlotID } from './slice'
+import { HomeFillIcon } from '@primer/octicons-react'
 let mailID
 if (typeof window !== 'undefined') {
   mailID = window.localStorage.getItem('emailID')
@@ -116,13 +117,31 @@ function ButtonMod ({ item }) {
 
 function Navbar () {
   return (
-        <nav className="flex px-6 py-3 rounded-b-lg p-0" style={{ border: '3px solid rgb(186,186,186)', borderTop: '0px' }}>
-            <div className="justify-between text-blue-gray-900 text-xl" >
-                MJA Wash<br />
-                <span className='text-lg'>Choose which slot to cancel</span>
-            </div>
+        <nav className='mx-auto max-w-screen-xl px-4 py-3 rounded-b-lg p-0' style={{ border: '3px solid rgb(186,186,186)', borderTop: '0px' }}>
+        <div className="flex flex-row">
+        <div className="text-blue-gray-700 text-xl my-auto" style={{ fontFamily: 'Varela Round' }} >
+            MJA Wash
+        </div>
+        <div className="ml-auto flex row-auto">
+            <Button size='sm' onClick={handleBookNowCLick} className={'px-2 bg-violet-800 hover:bg-violet-900 rounded-md'}
+                style={{
+                  width: '100%',
+                  border: '2px solid rgb(190,190,190)',
+                  color: 'rgb(249,249,249)'
+                }}>Book a Slot</Button>
+              <Button size='sm' onClick={handleHomeClick} className={'bg-violet-800 ml-2 hover:bg-violet-900 rounded-md'}
+                style={{
+                  width: '100%',
+                  border: '2px solid rgb(190,190,190)',
+                  color: 'rgb(249,249,249)'
+                }}><HomeFillIcon fill='#F5FFFA'/></Button>
+        </div>
+        </div>
 
-        </nav>
+        <SubHeading />
+
+    </nav>
+
   )
 }
 
@@ -182,7 +201,7 @@ function cancelSlot (e) {
           } else if (response.status === 200) {
             Swal.fire(
               'Success',
-              'Booking Confirmed',
+              'Slot cancelled successfully',
               'success'
             )
           } else if (response.status === 403) {
@@ -199,6 +218,12 @@ function cancelSlot (e) {
             ).then(() => {
               window.location.href = '/login?next=cancel'
             }
+            )
+          } else {
+            Swal.fire(
+              'Booking Failed',
+              'Unknown error occured',
+              'error'
             )
           }
         })
@@ -226,4 +251,16 @@ function fetchWeeklist () {
       })
       .catch((error) => { Swal.fire('Error', error, 'error'); resolve(null) })
   })
+}
+
+function SubHeading () {
+  return (
+        <div className='w-full m-1 mb-0 mt-2 text-xl'><Text>Pick a slot to cancel:</Text></div >
+  )
+}
+function handleBookNowCLick () {
+  window.location.href = '/book'
+}
+function handleHomeClick () {
+  window.location.href = '/status'
 }

@@ -1,5 +1,6 @@
 'use client'
-import { Container } from '@mantine/core'
+import { Button, Container } from '@mantine/core'
+import { HomeFillIcon } from '@primer/octicons-react'
 
 export default function Page () {
   if (typeof localStorage !== 'undefined') {
@@ -16,10 +17,17 @@ export default function Page () {
                 <div className="text-sm sm:text-lg sm:text-left mt-5 sm:mt-7">
                     You may now close this window.
                 </div>
+                <Button size='sm' onClick={handleHomeClick}
+                className={'bg-gray-500 hover:bg-gray-700 rounded-md mt-2'}
+                ><HomeFillIcon fill='#F5FFFA' className='m-5'/></Button>
 
             </Container>
             <div className='fixed mt-2 inset-x-0 bottom-3 text-center text-gray-800'>Built and Maintained by Akshat</div>
 
         </div>
   )
+}
+
+function handleHomeClick () {
+  window.location.href = '/'
 }

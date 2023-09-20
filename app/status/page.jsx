@@ -164,11 +164,14 @@ function Footer () {
   return (
         <nav className='mt-2 inset-x-0 bottom-0 flex mx-auto max-w-screen-xl px-4 py-3 rounded-t-lg p-0 items-center' style={{ border: '3px solid rgb(186,186,186)', borderBottom: '0px' }}>
           <Text>Status: {mailID ? `Logged in as ${mailID}` : 'Not logged in'}</Text>
-          <Button className='ml-auto bg-blue-800 hover:bg-blue-900' onClick={handleLogoutClick}
+          {mailID
+            ? <Button className='ml-auto bg-blue-800 hover:bg-blue-900' onClick={handleLogoutClick}
           style={{
             border: '2px solid rgb(190,190,190)',
             color: 'rgb(249,249,249)'
           }}>Logout</Button>
+            : ''
+        }
         </nav>
   )
 }

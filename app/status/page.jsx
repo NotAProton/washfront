@@ -106,7 +106,7 @@ function ButtonMod ({ item }) {
   return (
         <Button disabled={item.status !== 'booked'} size={'lg'} className={'block mt-2 rounded-md'}
             style={{
-              backgroundColor: item.status === 'booked' ? 'rgb(128,128,128)' : 'rgba(200,200,210, 0.6)',
+              backgroundColor: item.status === 'booked' ? 'rgb(100,100,100)' : 'rgba(200,200,210, 0.6)',
               width: '100%',
               border: '2px solid rgb(190,190,190)',
               color: item.status === 'booked' ? 'rgb(249,249,249)' : 'rgb(10,10,10)'

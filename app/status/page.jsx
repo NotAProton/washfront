@@ -106,10 +106,10 @@ function ButtonMod ({ item }) {
   return (
         <Button disabled={item.status !== 'booked'} size={'lg'} className={'block mt-2 rounded-md'}
             style={{
-              backgroundColor: item.status === 'booked' ? 'rgb(128,128,128)' : 'rgba(12, 156, 94, 0.5)',
+              backgroundColor: item.status === 'booked' ? 'rgb(128,128,128)' : 'rgba(200,200,210, 0.6)',
               width: '100%',
-              border: item.status === 'booked' ? '2px solid rgb(190,190,190)' : '2px solid rgb(9, 121, 105)',
-              color: item.status === 'booked' ? 'rgb(249,249,249)' : 'rgb(0,53,0)'
+              border: '2px solid rgb(190,190,190)',
+              color: item.status === 'booked' ? 'rgb(249,249,249)' : 'rgb(10,10,10)'
             }}
             onClick={() => { dispatch(openModal()); dispatch(setChosenSlotID(item.slotno)) }}
             >{item.label}</Button>

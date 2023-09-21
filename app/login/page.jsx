@@ -1,6 +1,5 @@
 'use client'
-import { useEffect, useState } from 'react'
-import { redirect } from 'next/navigation'
+import { useState } from 'react'
 import { Container, TextInput, Text, Button, Loader, PasswordInput } from '@mantine/core'
 import { apiDomain } from '../config'
 import Swal from 'sweetalert2'
@@ -48,6 +47,7 @@ export default function Page () {
     if (typeof window !== 'undefined') {
       urlParams = new URLSearchParams(window.location.search)
       nextRedirect = urlParams.get('next')
+      if (!nextRedirect) nextRedirect = 'status'
     }
 
     fetch(`${apiDomain}/login`, {

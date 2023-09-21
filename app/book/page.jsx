@@ -194,7 +194,7 @@ function confirmBooking (e) {
             'error'
           )
           localStorage.removeItem('key')
-          window.location.href = '/login'
+          window.location.href = '/login?next=book'
         } else if (response.status === 200) {
           Swal.fire(
             'Success',

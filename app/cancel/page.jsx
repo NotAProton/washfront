@@ -7,6 +7,7 @@ import Swal from 'sweetalert2'
 import { useSelector, useDispatch } from 'react-redux'
 import { closeCancelModal, openCancelModal, setWeeklist, setChosenSlotID } from './slice'
 import { HomeFillIcon } from '@primer/octicons-react'
+import { useRouter } from 'next/navigation'
 let mailID
 if (typeof window !== 'undefined') {
   mailID = window.localStorage.getItem('emailID')
@@ -34,10 +35,11 @@ function useInterval (callback, delay) {
 export default function Page () {
   const weeklist = useSelector(state => state.cancel.weeklist)
   const dispatch = useDispatch()
+  const router = useRouter()
 
   if (typeof window !== 'undefined') {
     if (!window.localStorage.getItem('key')) {
-      window.location.href = '/login?next=cancel'
+      router.push('/login?next=cancel')
     }
   }
 
@@ -116,6 +118,7 @@ function ButtonMod ({ item }) {
 }
 
 function Navbar () {
+  const router = useRouter()
   return (
         <nav className='mx-auto max-w-screen-xl px-4 py-3 rounded-b-lg p-0' style={{ border: '3px solid rgb(186,186,186)', borderTop: '0px' }}>
         <div className="flex flex-row">
@@ -123,13 +126,13 @@ function Navbar () {
             MJA Wash
         </div>
         <div className="ml-auto flex row-auto">
-            <Button size='sm' onClick={handleBookNowCLick} className={'px-2 bg-violet-800 hover:bg-violet-900 rounded-md'}
+            <Button size='sm' onClick={() => router.push('/book')} className={'px-2 bg-violet-800 hover:bg-violet-900 rounded-md'}
                 style={{
                   width: '100%',
                   border: '2px solid rgb(190,190,190)',
                   color: 'rgb(249,249,249)'
                 }}>Book a Slot</Button>
-              <Button size='sm' onClick={handleHomeClick} className={'bg-violet-800 ml-2 hover:bg-violet-900 rounded-md'}
+              <Button size='sm' onClick={() => router.push('/')} className={'bg-violet-800 ml-2 hover:bg-violet-900 rounded-md'}
                 style={{
                   width: '100%',
                   border: '2px solid rgb(190,190,190)',
@@ -180,6 +183,7 @@ function cancelSlot (e) {
   return new Promise((resolve) => {
     const key = localStorage.getItem('key')
     const params = new URLSearchParams()
+    const router = useRouter()
     params.append('slot', e)
 
     fetch(`${apiDomain}/cancel`, {
@@ -216,7 +220,8 @@ function cancelSlot (e) {
               'Authentication failed: Please login and try again',
               'error'
             ).then(() => {
-              window.location.href = '/login?next=cancel'
+              localStorage.removeItem('key')
+              router.push('/login?next=cancel')
             }
             )
           } else {
@@ -257,10 +262,4 @@ function SubHeading () {
   return (
         <div className='w-full m-1 mb-0 mt-2 text-xl'><Text>Pick a slot to cancel:</Text></div >
   )
-}
-function handleBookNowCLick () {
-  window.location.href = '/book'
-}
-function handleHomeClick () {
-  window.location.href = '/status'
 }

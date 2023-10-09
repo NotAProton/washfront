@@ -7,6 +7,7 @@ import Swal from 'sweetalert2'
 import { useSelector, useDispatch } from 'react-redux'
 import { closeBookingModal, openBookingModal, setWeeklist, setChosenSlotID } from './slice'
 import { HomeFillIcon } from '@primer/octicons-react'
+import { useRouter } from 'next/navigation'
 
 function useInterval (callback, delay) {
   const savedCallback = useRef()
@@ -31,10 +32,11 @@ function useInterval (callback, delay) {
 export default function Page () {
   const weeklist = useSelector(state => state.main.weeklist)
   const dispatch = useDispatch()
+  const router = useRouter()
 
   if (typeof window !== 'undefined') {
     if (!window.localStorage.getItem('key')) {
-      window.location.href = '/login?next=book'
+      router.push('/login?next=book')
     }
   }
 
@@ -112,6 +114,7 @@ function ButtonMod ({ item }) {
 }
 
 function Navbar () {
+  const router = useRouter()
   return (
         <nav className='mx-auto max-w-screen-xl px-4 py-3 rounded-b-lg p-0' style={{ border: '3px solid rgb(186,186,186)', borderTop: '0px' }}>
         <div className="flex flex-row">
@@ -119,13 +122,13 @@ function Navbar () {
             MJA Wash
         </div>
         <div className="ml-auto flex row-auto">
-            <Button size='sm' onClick={handleCancelNowCLick} className={'px-2 bg-violet-800 hover:bg-violet-900 rounded-md'}
+            <Button size='sm' onClick={() => router.push('/cancel')} className={'px-2 bg-violet-800 hover:bg-violet-900 rounded-md'}
                 style={{
                   width: '100%',
                   border: '2px solid rgb(190,190,190)',
                   color: 'rgb(249,249,249)'
                 }}>Cancel a Slot</Button>
-              <Button size='sm' onClick={handleHomeClick} className={'bg-violet-800 ml-2 hover:bg-violet-900 rounded-md'}
+              <Button size='sm' onClick={() => router.push('/')} className={'bg-violet-800 ml-2 hover:bg-violet-900 rounded-md'}
                 style={{
                   width: '100%',
                   border: '2px solid rgb(190,190,190)',
@@ -177,6 +180,7 @@ function confirmBooking (e) {
     const key = localStorage.getItem('key')
     const params = new URLSearchParams()
     params.append('slot', e)
+    const router = useRouter()
 
     fetch(`${apiDomain}/book`, {
       method: 'POST',
@@ -194,7 +198,7 @@ function confirmBooking (e) {
             'error'
           )
           localStorage.removeItem('key')
-          window.location.href = '/login?next=book'
+          router.push('/login?next=book')
         } else if (response.status === 200) {
           Swal.fire(
             'Success',
@@ -238,13 +242,6 @@ function fetchWeeklist () {
       })
       .catch((error) => { Swal.fire('Error', error, 'error'); resolve(null) })
   })
-}
-
-function handleCancelNowCLick () {
-  window.location.href = '/cancel'
-}
-function handleHomeClick () {
-  window.location.href = '/status'
 }
 
 function SubHeading () {

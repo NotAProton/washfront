@@ -3,14 +3,19 @@ import { useState } from 'react'
 import { Container, TextInput, Text, Button, Loader, PasswordInput } from '@mantine/core'
 import { apiDomain } from '../config'
 import Swal from 'sweetalert2'
+import { useRouter } from 'next/navigation'
 
 export default function Page () {
+  const [sm] = useState(
+    (typeof window !== 'undefined') ? window.matchMedia('(min-width: 768px)').matches : null
+  )
+
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const Toast = Swal.mixin({
     toast: true,
-    position: 'top',
+    position: sm ? 'top' : 'center',
     showConfirmButton: false,
     timer: 3000,
     timerProgressBar: true,
@@ -36,6 +41,7 @@ export default function Page () {
   const isPasswordValid = () => {
     return password.length < 20 && password.length >= 3
   }
+  const router = useRouter()
 
   const handleButtonClick = () => {
     setLoading(true)
@@ -67,7 +73,7 @@ export default function Page () {
           response.text().then((data) => {
             localStorage.setItem('emailID', email)
             localStorage.setItem('key', data)
-            window.location.href = `/${nextRedirect}`
+            router.push(`/${nextRedirect}`)
           })
         }
       })
